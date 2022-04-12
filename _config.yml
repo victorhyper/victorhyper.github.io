@@ -24,13 +24,10 @@ description: >- # this means to ignore newlines until "baseurl:"
   这里是Victorhyper的个人博客。积累技术，分享生活，千里之行始于足下，百层高台始于垒土。
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  jekyll
+twitter_username: victorhyper
+github_username:  victorhyper
 
 # Build settings
-<<<<<<< HEAD
-=======
->>>>>>> 01b60de1b1a4c455ed51a34c021e5f657e6ef799
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-feed
