@@ -23,13 +23,13 @@ email: victorhyper@qq.com
 description: >- # this means to ignore newlines until "baseurl:"
   这里是Victorhyper的个人博客。积累技术，分享生活，千里之行始于足下，百层高台始于垒土。
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+url: "http://victorhyper.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: victorhyper
 github_username:  victorhyper
 
 # Build settings
-#theme: minima
-remote_theme: chrisrhymes/mere-blog-theme
+theme: minima
+#remote_theme: chrisrhymes/mere-blog-theme
 plugins:
   - jekyll-feed
 
