@@ -28,7 +28,7 @@ twitter_username: victorhyper
 github_username:  victorhyper
 
 # Build settings
-theme: jekyll-theme-cayman
+theme: minima
 plugins:
   - jekyll-feed
 
