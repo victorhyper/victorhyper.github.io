@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "QT3D开发-画线"
 date:   2022-06-14 15:36:28 +0800
 categories: jekyll update
