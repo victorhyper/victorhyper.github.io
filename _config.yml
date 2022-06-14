@@ -29,6 +29,7 @@ github_username:  victorhyper
 
 # Build settings
 remote_theme: "mmistakes/minimal-mistakes"
+minimal_mistakes_skin: "air"
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
