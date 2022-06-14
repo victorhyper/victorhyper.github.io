@@ -28,7 +28,7 @@ twitter_username: victorhyper
 github_username:  victorhyper
 
 # Build settings
-theme: minima
+#theme: minima
 remote_theme: "mmistakes/minimal-mistakes"
 plugins:
   - jekyll-feed
