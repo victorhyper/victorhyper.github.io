@@ -28,7 +28,7 @@ twitter_username: victorhyper
 github_username:  victorhyper
 
 # Build settings
-theme: mmistakes/minimal-mistakes
+remote_theme: "mmistakes/minimal-mistakes"
 plugins:
   - jekyll-feed
   - jekyll-remote-theme
