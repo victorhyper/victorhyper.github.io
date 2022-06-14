@@ -30,7 +30,7 @@ repository: "victorhyper"
 
 twitter_username: victorhyper
 github_username:  victorhyper
-
+author_profile: true
 
 # Site Author
 author:
@@ -65,6 +65,7 @@ defaults:
       path: ""
       type: posts
     values:
+      show_date: true
       author_profile: true
 # Exclude from processing.
 # The following items will not be processed, by default.
