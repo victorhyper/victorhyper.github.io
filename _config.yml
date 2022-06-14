@@ -32,7 +32,8 @@ twitter_username: victorhyper
 github_username:  victorhyper
 
 
-#site author
+# Site Author
+author:
 name : "victorhyper"
 avatar : "/assets/logo.png"
 bio : "朝夕五年，一朝被绿"
