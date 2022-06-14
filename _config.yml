@@ -28,8 +28,8 @@ twitter_username: victorhyper
 github_username:  victorhyper
 
 # Build settings
-theme: minima
-#remote_theme: chrisrhymes/mere-blog-theme
+#theme: minima
+remote_theme: chrisrhymes/mere-blog-theme
 plugins:
   - jekyll-feed
 
