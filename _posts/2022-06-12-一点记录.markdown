@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: single
 title:  "一点记录"
 date:   2022-06-12 15:46:48 +0800
 author : "victorhyper"
