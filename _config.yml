@@ -17,13 +17,18 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-
-title: 欢迎来到Victorhyper的博客
-email: victorhyper@qq.com
-description: >- # this means to ignore newlines until "baseurl:"
-  这里是Victorhyper的个人博客。积累技术，分享生活，千里之行始于足下，百层高台始于垒土。
-baseurl: "" # the subpath of your site, e.g. /blog
+locale: "zh-cn"
+title: "Victor Hyper's Blog"
+title_separator: "-"
+subtitle: "边学边用"
+name: "Victor Hyper"
+email: "victorhyper@qq.com"
+description: "积累技术，分享生活"
+baseurl: "http://victorhyper.github.io" # the subpath of your site, e.g. /blog
 url: "http://victorhyper.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+repository: "victorhyper"
+logo: /assets/logo.jpg
+
 twitter_username: victorhyper
 github_username:  victorhyper
 
