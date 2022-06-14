@@ -1,0 +1,174 @@
+**一、搭建QT运行环境**
+1.下载安装
+使用QT框架进行开发需要先下载QT，QT框架在下载时有许多可选的模块，这里把3D有关的模块都勾上，其实这些模块里面就是一个个的QT标准类，还包含一些QT重写的模板类，比如QString，QVector之类的，但是如果不是特别想用相关的新特性，还是使用std的标准库进行编程比较好，一方面锻炼了标准库下的编程能力（刷LeetCode快），另一方面代码也可以移植到所有的C++工程中而不是仅仅在QT框架下运行。
+QT默认下载的时候还需要选择你的编译器，在windows上配合VS使用的MSVC编译器，所有平台通用的mingw，以及Apple支持的clang。其实都是可以使用的，几家编译器的区别在此不做赘述，一般使用mingw和MSVC就行。
+2.配置与环境选择
+QT下载的时候还会附带下载QTCreator，这个IDE除了可以比较方便的打开很多示例程序之外并无优点，代码的浏览和调试和VS没法比，而且自动补全功能反应也比较慢/检查错误也是奇奇怪怪，总之如果写大工程并不推荐使用QTCreator进行编写，我采取的是VSCode配合QTCreator进行调试（因为VSCode用的C++调试器更不智能。。。），这样代码的浏览体验和自动补全功能都不错，在设置vscode的时候建议新建一个单独的配置，避免影响其他C++工程。在配置中主要需要修改的是包含路径，需要把QT整个库文件夹包含进去，其实可以使用/**来进行递归包含整个include下的所有文件夹的，不知道为什么我那样做不行，就干脆所有文件夹都打上了。
+其实在VS下也是可以进行QT编程的，毕竟宇宙第一IDE。使用VS编辑QT需要在扩展市场里下载QT相关的两个插件之后就可以在VS里找到并新建QT工程了，在进行编译之前需要在Qt Version里指定使用的编译器的位置。（我为啥不用呢，因为QT在VS里嵌套的ui设计器老是崩溃，我就干脆不用了） 
+**二、新建工程**
+创建工程时的配置
+我们先选择Qt widget application的选项，widget是一种类似winForm之类的东西，如果读者做个MFC开发或者.NET开发应该很好理解，类似与MFC，Qt的一切都是基于QObject这个基类上搭建了一切，举例其中最简单也是最重要的例子，Qt的信号槽机制正是在QObject这个类中实现的，这个机制保证了发出的信号能被正确的发出、传递与处理，与MFC的消息路由机制有异曲同工之处。回到正题，在这之后需要选择的是联合编译工具，其中CMake是普遍的跨平台工具，使用的文件是makefile后缀，qmake是QT自己的联合编译工具，使用的文件是pro后缀，如果没有联合其他C++代码，qmake应该是相对简单的，但是其实主要是书写一个makefile的方式值得学习，如果单纯的编译起来这两个东西其实应该没有什么区别。在这之后也就是选择编译器、QT版本之类的选项，可以根据自己按需选择，至于怎么写出第一个hello world就交给读者了。
+2.一点其他的内容
+在QTCreator这个沙雕IDE中，你写一个东西他只会提示你有没有，很多东西还得自己去手动包含，比如QEntity是Qt3DCore中的大量使用过的类，但是在包含Qt3DCore时却没有自动包含QEntity，需要你自己在前面敲上
+#include <QEntity>
+这可真是太沙比了。所以在碰到你觉得应该有这个类，但是QTCreator却给你报错时，不妨去前面敲上include试试，如果是在VSCode下这种事就可以自动解决了。
+**三、3D模块实现**
+1.先搞个背景
+
+Qt3DExtras::Qt3DWindow * view=new Qt3DExtras::Qt3DWindow();//创建画布
+view->defaultFrameGraph()->setClearColor(QColor(QRgb(0xf0f0f0)));//设置画布颜色
+上面的代码就能创建一个3D画布用来容纳3D实体，只要把这个画布加入到ui的布局中，或者插入到新建的窗口布局中，就能将3D物体放置在其中。
+有了画布就需要基础的3D场景，我们通过代码创建一个什么都没有的实体作为场景，这个场景包含相机参数，光线参数，以及其他3D实体。
+
+Qt3DCore::QEntity *rootEntity=new Qt3DCore::QEntity();//创建空场景
+view->setRootEntity(rootEntity);//把空场景作为画布的基本场景
+//下面这个是负责创建物理设备并处理相关节点映射，负责根据当前输入设置建立要在特定时间允运行的作业对象
+Qt3DInput::QInputAspect * input =new Qt3DInput::QInputAspect;
+view->registerAspect(input);
+
+2.再搞个摄影机
+光有存放3D物体的画布肯定不够，想要看到3D物体，我们必须也有一双在画布中的眼睛，这个眼睛就是摄像机，摄像机可以抽象为一个点，而你能看到的东西就取决于能进到这个点里的光线，这与现实世界中的物理原理是一致的。下图是一个透视投影的视锥（当然也还有平行投影，平行投影等于把所有东西都平行移动到你眼前，你就看不出3D效果了，所以我们需要的是透视投影）。
+ 
+
+Qt3DRender::QCamera *cameraEntity=view->camera();//获取场景的相机指针
+cameraEntity->lens()->setPerspeectiveProjection(45.0f,16.0f/9.0f,0.1f,1000.0f);//设置相机的宽高比，范围等
+cameraEntity->setPosition(QVector3D(50,50,50));//设置相机在空间中的坐标
+cameraEntity->setUpVector(QVector3D(0,0,1));//设置方向上是采取哪一个向量，0,0,1即表示z轴朝上
+cameraEntity->setViewCenter(Qvector3D(0,0,0));//设置视野中心
+3.光源、摄影机控制和变换矩阵
+有了场景和摄像机，我们还需要光才能看到东西，当然你也可以设置3D实体的材质为自发光属性，这样实体就能像灯泡一样自己发光了，但是如果是没有自发光材质的实体，则需要有光照才能看到它。
+有了光照我们还需要一个摄像机的变换矩阵，第二小节里的透视关系应该很直观了，我们在计算机程序中进行的3D建模在显示的时候仍然是显示在平面显示器上的，所以我们需要通过一个变换矩阵把所有能看到的东西投影出来才能显示，在这里设置变换矩阵的时候可以指定画面比例，缩放比例等。
+
+Qt3DCore::QEntity *lightEntity=new Qt3DCore::QEntity(rootEntity);//光照实体
+Qt3DRender::QPointLight *light=new Qt3DRender::QPointLight(lightEntity);//指定创建的实体为点光源
+light->setColor("white");//指定光颜色
+light->setIntensity(1);//亮度
+light->addComponent(light);
+Qt3DCore::QTransform *lightTransform=new Qt3DCore::QTransform(lightEntity);
+lightTransform->setTranslation(cameraEntity->position());//通过相机位置创建变换矩阵
+//第一人称相机控制
+Qt3DExtras::QFirstPersonCameraController*camController=new Qt3DExtras::QFirstPersonCameraController(rootEntity);
+camController->setCamera(cameraEntity);
+camController->setLinearSpeed(30);//移动速度
+camController->setLookSpeed(30);//旋转视角速度
+//设置透视变换
+view->camera()->lens()->setPerspectiveProjection(45.0f,view->width()/view->height(),0.01f,5000.0f);
+//设置缩放
+Qt3DCore::QTransform * rootTransform=new Qt3DCore::QTransform();
+rootTransform->astScale(1.0f,30.0f);
+rootEntity->addComponent(rootTransform);
+
+4.创建实体根节点（场景）
+所有的三维实体除了摆放在画布上，肯定还得放在同一场景下，相当于背景，所有的其他三维实体都是根节点的子项,这个实体根节点我们创建为rootEntity,后续所有其他实体的创建都需要把这个场景传入或者在创建后把创建的实体加入到这个场景中，才能正常的显示，我们这次场景不需要任何的实际物体，相当于一个空白背景，这里就不需要其他操作了，只需要两行代码就行。
+
+Qt3DCore::QEntity * rootEntity=new Qt3DCore::QEntity();
+view->setRootEntity(rootEntity);
+5.创建简单几何实体
+5.1OpenGL部分原理简介
+由于QT3D其实是在OpenGL的基础上做封装得到的，我们有必要尽可能简洁的描述OpenGL的部分原理。在OpenGL的ECS模式中，定义一个3维物体需要几何网络、顶点着色器、像素着色器等。我们先从几何网络说起，在OpenGL中，每个面都是由三个顶点构成的，也就是一个三角形，复合的表面是由大量三角形拼接而成，构成三角形的点被称为顶点，这就引入了我们的下一个关键内容，顶点着色器。着色器是一段决定输入位置应该显示什么颜色的代码，所以顶点着色器就决定了顶点应该显示什么颜色的像素，点当然可以被识别为像素，那么三维空间里的面怎么识别成像素呢，这就要经历下一个关键步骤，光栅化，这一步的主要内容是给顶点生成的三角形面分配具体显示使用的像素，然后通过像素着色器得到这个像素应当显示的颜色，当我们经过这些处理之后我们基本就把所有像素着色完毕了，我们的绘制也就完成了。
+5.2从最简单的实体入手：线
+上来就处理三角形、顶点着色器之类的显然对于新手而言不够友好，因此我们选择创建一组线来作为我们的初次练手。虽然是线，但是还是需要处理挺多东西的。
+Qt3DCore::QEntity * MyModel::AddLine(const QVector3D& start, const QVector3D& end, const QColor& color, Qt3DCore::QEntity *m_rootEntity)
+{
+    //构建顶点
+    auto *geometry = new Qt3DCore::QGeometry(m_rootEntity);
+    // position vertices (start and end
+    QByteArray bufferBytes;
+
+    bufferBytes.resize(3 * 2 * sizeof(float)); // start.x, start.y, start.end + end.x, end.y, end.z
+    //直接生成float数组然后转换成bytebuffer
+    float *positions = reinterpret_cast<float*>(bufferBytes.data());
+    *positions++ = start.x();
+    *positions++ = start.y();
+    *positions++ = start.z();
+    *positions++ = end.x();
+    *positions++ = end.y();
+    *positions++ = end.z();
+    //把内容传进buffer
+    auto *buf = new Qt3DCore::QBuffer(geometry);
+    buf->setData(bufferBytes);
+    //把buffer变成顶点Attribute数据
+    auto *positionAttribute = new Qt3DCore::QAttribute(geometry);
+    positionAttribute->setName(Qt3DCore::QAttribute::defaultPositionAttributeName());
+    positionAttribute->setVertexBaseType(Qt3DCore::QAttribute::Float);
+    positionAttribute->setVertexSize(3);
+    positionAttribute->setAttributeType(Qt3DCore::QAttribute::VertexAttribute);
+    positionAttribute->setBuffer(buf);
+    positionAttribute->setByteStride(3 * sizeof(float));
+    positionAttribute->setCount(2);
+    //顶点生成完成
+    geometry->addAttribute(positionAttribute); // We add the vertices in the geometry
+
+    //构建两个顶点之间的链接
+    // connectivity between vertices
+    QByteArray indexBytes;
+    indexBytes.resize(2 * sizeof(unsigned int)); // start to end
+    unsigned int *indices = reinterpret_cast<unsigned int *>(indexBytes.data());
+    *indices++ = 0;
+    *indices++ = 1;
+    //生成buffer
+    auto *indexBuffer = new Qt3DCore::QBuffer(geometry);
+    indexBuffer->setData(indexBytes);
+    //生成顶点
+    auto *indexAttribute = new Qt3DCore::QAttribute(geometry);
+    indexAttribute->setVertexBaseType(Qt3DCore::QAttribute::UnsignedInt);
+    indexAttribute->setAttributeType(Qt3DCore::QAttribute::IndexAttribute);
+    indexAttribute->setBuffer(indexBuffer);
+    indexAttribute->setCount(2);
+
+    geometry->addAttribute(indexAttribute); // We add the indices linking the points in the geometry
+
+    //生成mesh网格
+    // mesh
+
+    auto *line = new Qt3DRender::QGeometryRenderer(m_rootEntity);
+    line->setGeometry(geometry);
+    line->setPrimitiveType(Qt3DRender::QGeometryRenderer::Lines);
+  
+      //指定材质
+    auto *material = new Qt3DExtras::QPhongMaterial(m_rootEntity);
+    material->setDiffuse(QColor(QRgb(0xffffff)));
+    material->setAmbient(color);
+    material->setShininess(10);
+    // entity
+
+    auto *lineEntity = new Qt3DCore::QEntity(m_rootEntity);
+
+    lineEntity->addComponent(line);
+
+    lineEntity->addComponent(material);
+    
+    return lineEntity;
+}
+
+5.3三维实体方块，但是调库
+虽然创建一个实体一般要求写几何网络和着色器，但是一些基本的几何体QT给我们提供了现成的，比如说方块。
+
+Qt3DCore::QEntity* MyModel::AddCube(float xEx,float yEx,float zEx,Qt3DCore::QEntity*m_rootEntity)
+{
+    //长方体
+    auto m_cube=new Qt3DExtras::QCuboidMesh();
+    m_cube->setXExtent(xEx);
+    m_cube->setYExtent(yEx);
+    m_cube->setZExtent(zEx);
+    Qt3DCore::QTransform *cubeTransform = new Qt3DCore::QTransform();
+    cubeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(xEx/2.0f,0,0), 90));//旋转
+    cubeTransform->setTranslation(QVector3D(xEx/2,0,0));//平移
+
+    Qt3DExtras::QPhongMaterial *cubeMaterial = new Qt3DExtras::QPhongMaterial();
+    cubeMaterial->setDiffuse(QColor(190,190,190));
+    cubeMaterial->setAmbient(QColor(200,200,200));
+    cubeMaterial->setShininess(0.6);
+
+    auto cubeEntity = new Qt3DCore::QEntity(m_rootEntity);
+    cubeEntity->addComponent(m_cube);
+    cubeEntity->addComponent(cubeTransform);
+    cubeEntity->addComponent(cubeMaterial);
+    m_pipe=cubeEntity;
+    return cubeEntity;
+}
+
+5.4你已经是个成熟的QT3D工程师了，试试这个吧→billboard
+billboard（公告牌）是一种在3维显示中普遍应用的技术，主要应用场景是一些需要大量摆放又不需要精细显示的物体，如果给这些物体都创建三维实体会大大提升运算量影响性能，所以公告牌解决这个问题的方式就是把这些物体都变成贴图，变成一张永远朝向着摄像机的贴图，就好像在大部分游戏里的草，你不走到它的正上方很难发现这些草其实就是一张贴图。
+为了完成这个任务，我们需要从QT3D的更深层次开始搞，就是OpenGL，我们需要直接的控制着色器和顶点，为此我们要写自己的几何网络生成函数、材质生成函数、着色器代码以及阴影特效代码。
+**
