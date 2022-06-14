@@ -27,10 +27,18 @@ description: "积累技术，分享生活"
 #baseurl: "http://victorhyper.github.io" # the subpath of your site, e.g. /blog
 #url: "http://victorhyper.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 repository: "victorhyper"
-logo: "/assets/logo.png"
 
 twitter_username: victorhyper
 github_username:  victorhyper
+
+
+#site author
+name : "victorhyper"
+avatar : "/assets/logo.png"
+bio : "朝夕五年，一朝被绿"
+locatio : "Wuhan-China"
+email : "victorhyper1@gmail.com"
+
 
 # Build settings
 remote_theme: "mmistakes/minimal-mistakes"
