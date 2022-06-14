@@ -29,9 +29,10 @@ github_username:  victorhyper
 
 # Build settings
 theme: minima
-#remote_theme: chrisrhymes/mere-blog-theme
+remote_theme: "mmistakes/minimal-mistakes"
 plugins:
   - jekyll-feed
+  - jekyll-remote-theme
 
 # Exclude from processing.
 # The following items will not be processed, by default.
