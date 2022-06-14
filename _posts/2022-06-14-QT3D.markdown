@@ -1,7 +1,6 @@
 ---
 title:  "QT3D开发-画线"
 date:   2022-06-14 15:36:28 +0800
-author : "victorhyper"
 ---
 # 一、搭建QT运行环境
 
