@@ -35,4 +35,5 @@ gem "http_parser.rb", "~> 0.6.0", :platforms => [:jruby]
 gem "mere-blog-theme"
 
 gem "github-pages", group: :jekyll_plugins
-gem "jekyll-remote-theme"
+gem "jekyll-include-cache", group: :jekyll_plugins
+gem "jekyll-remote-theme", group: :jekyll_plugins
