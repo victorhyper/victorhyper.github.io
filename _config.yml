@@ -67,6 +67,13 @@ defaults:
     values:
       show_date: true
       author_profile: true
+  #pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      show_date: true
+      author_profile: true
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
