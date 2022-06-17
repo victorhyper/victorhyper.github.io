@@ -3,4 +3,4 @@ title:  "WPF3D绘制"
 date:   2022-6-17 11:30:23 +0800
 ---
 # 1基本模式
-![图示1](images/WPF/Mesh图解.jpeg)
+![图示1](/images/WPF/Mesh图解.jpeg)
