@@ -4,3 +4,54 @@ date:   2022-6-17 11:30:23 +0800
 ---
 # 1基本模式
 ![图示1](/images/WPF/Mesh图解.jpeg)
+# 2抽象程序结构
+## 2.1绘图部分
+    绘图部分包含基础的3D绘图，主要要抽象成绘制线和面的两类情况，绘制线的时候输入是空间中的两个点，以及线的颜色、线宽（有默认值）。
+    ```
+    SCreenSpaceLines3D DrawLine(Point3D p1,Point3D p2,Color color,int thickness=2)
+    {
+        Point3DCollection point3Ds = new Point3DCollection();
+        point3Ds.Add(p1);
+        point3Ds.Add(p2);
+        ScreenSpaceLines3D Line = new ScreenSpaceLines3D() { Points = point3Ds, Thickness = thickness, Color = color };
+        return Line;
+    }
+    ```
+    绘制面的时候则要考虑的内容比较多，绘制面应当由空间中一个闭合点路径进行绘制，我的程序不考虑空间曲面的情况，所以其实我只要想办法拆分成几个三角形就行，对于空间曲面应该需要拆分成足够数量的面才能保证视觉效果上的连续。所以我的面绘制函数输入应该为一个闭合的同平面上的路径点（首尾相接），面的颜色，材质（有默认值），输出为面元素，通过在面上去一个中间点，与路径点两两相连形成三角形，生成元素。
+    ```
+    public static ModelVisual3D DrawSurface(Point3DCollection plist, Color color,DiffuseMaterial material)
+        {
+            ModelVisual3D surface = new ModelVisual3D();
+            //求取中心点
+            double XSum=0,YSum=0,ZSum=0;
+            foreach(var p in plist)
+            {
+                XSum += p.X;
+                YSum += p.Y;
+                ZSum += p.Z;
+            }
+            Point3D centerPoint=new Point3D(XSum/plist.Count,YSum/plist.Count,ZSum/plist.Count);
+            //创建mesh
+            //正面
+            MeshBuilder mb = new MeshBuilder();
+            for(int i=0;i<plist.Count-1;i++)
+            {
+                mb.AddTriangle(plist[i], plist[i + 1], centerPoint);
+            }
+            //反面
+            for (int i = plist.Count - 1; i >0; i--)
+            {
+                mb.AddTriangle(plist[i], plist[i - 1], centerPoint);
+            }
+
+            MeshGeometry3D surfaceMesh = mb.ToMesh();
+            //创建几何网络
+            GeometryModel3D geometryModel3D = new GeometryModel3D();
+            geometryModel3D.Geometry = surfaceMesh;
+            geometryModel3D.Material = material;
+            surface.Content = geometryModel3D;
+            return surface;
+        }
+    ```
+
+[参考1]（https://cloud.tencent.com/developer/article/1760865）
