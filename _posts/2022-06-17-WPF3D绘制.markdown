@@ -7,59 +7,58 @@ date:   2022-6-17 11:30:23 +0800
 # 2抽象程序结构
 ## 2.1绘图部分
 绘图部分包含基础的3D绘图，主要要抽象成绘制线和面的两类情况，绘制线的时候输入是空间中的两个点，以及线的颜色、线宽（有默认值）。
-    ```
-    {
-    SCreenSpaceLines3D DrawLine(Point3D p1,Point3D p2,Color color,int thickness=2)
-    {
-        Point3DCollection point3Ds = new Point3DCollection();
-        point3Ds.Add(p1);
-        point3Ds.Add(p2);
-        ScreenSpaceLines3D Line = new ScreenSpaceLines3D() { Points = point3Ds, Thickness = thickness, Color = color };
-        return Line;
-    }
-    }
-    ```
-绘制面的时候则要考虑的内容比较多，绘制面应当由空间中一个闭合点路径进行绘制，我的程序不考虑空间曲面的情况，所以其实我只要想办法拆分成几个三角形就行，对于空间曲面应该需要拆分成足够数量的面才能保证视觉效果上的连续。所以我的面绘制函数输入应该为一个闭合的同平面上的路径点（首尾相接），面的颜色，材质（有默认值），输出为面元素，通过在面上去一个中间点，与路径点两两相连形成三角形，生成元素。
-    ```
-    {
-    public static ModelVisual3D DrawSurface(Point3DCollection plist, Color color,DiffuseMaterial material)
+    
+        SCreenSpaceLines3D DrawLine(Point3D p1,Point3D p2,Color color,int thickness=2)
         {
-            ModelVisual3D surface = new ModelVisual3D();
-            //求取中心点
-            double XSum=0,YSum=0,ZSum=0;
-            foreach(var p in plist)
-            {
-                XSum += p.X;
-                YSum += p.Y;
-                ZSum += p.Z;
-            }
-            Point3D centerPoint=new Point3D(XSum/plist.Count,YSum/plist.Count,ZSum/plist.Count);
-            //创建mesh
-            //正面
-            MeshBuilder mb = new MeshBuilder();
-            for(int i=0;i<plist.Count-1;i++)
-            {
-                mb.AddTriangle(plist[i], plist[i + 1], centerPoint);
-            }
-            //反面
-            for (int i = plist.Count - 1; i >0; i--)
-            {
-                mb.AddTriangle(plist[i], plist[i - 1], centerPoint);
-            }
-
-            MeshGeometry3D surfaceMesh = mb.ToMesh();
-            //创建几何网络
-            GeometryModel3D geometryModel3D = new GeometryModel3D();
-            geometryModel3D.Geometry = surfaceMesh;
-            geometryModel3D.Material = material;
-            surface.Content = geometryModel3D;
-            return surface;
+            Point3DCollection point3Ds = new Point3DCollection();
+            point3Ds.Add(p1);
+            point3Ds.Add(p2);
+            ScreenSpaceLines3D Line = new ScreenSpaceLines3D() { Points = point3Ds, Thickness = thickness, Color = color };
+            return Line;
         }
-    }
-    ```
+    
+绘制面的时候则要考虑的内容比较多，绘制面应当由空间中一个闭合点路径进行绘制，我的程序不考虑空间曲面的情况，所以其实我只要想办法拆分成几个三角形就行，对于空间曲面应该需要拆分成足够数量的面才能保证视觉效果上的连续。所以我的面绘制函数输入应该为一个闭合的同平面上的路径点（首尾相接），面的颜色，材质（有默认值），输出为面元素，通过在面上去一个中间点，与路径点两两相连形成三角形，生成元素。
+    
+        public static ModelVisual3D DrawSurface(Point3DCollection plist, Color color,DiffuseMaterial material)
+            {
+                ModelVisual3D surface = new ModelVisual3D();
+                //求取中心点
+                double XSum=0,YSum=0,ZSum=0;
+                foreach(var p in plist)
+                {
+                    XSum += p.X;
+                    YSum += p.Y;
+                    ZSum += p.Z;
+                }
+                Point3D centerPoint=new Point3D(XSum/plist.Count,YSum/plist.Count,ZSum/plist.Count);
+                //创建mesh
+                //正面
+                MeshBuilder mb = new MeshBuilder();
+                for(int i=0;i<plist.Count-1;i++)
+                {
+                    mb.AddTriangle(plist[i], plist[i + 1], centerPoint);
+                }
+                //反面
+                for (int i = plist.Count - 1; i >0; i--)
+                {
+                    mb.AddTriangle(plist[i], plist[i - 1], centerPoint);
+                }
+
+                MeshGeometry3D surfaceMesh = mb.ToMesh();
+                //创建几何网络
+                GeometryModel3D geometryModel3D = new GeometryModel3D();
+                geometryModel3D.Geometry = surfaceMesh;
+                geometryModel3D.Material = material;
+                surface.Content = geometryModel3D;
+                return surface;
+            }
 绘图部分抽象成这两部分暂时结束，接下来是输入内容抽象
 ## 2.2数据抽象
 本质上，无论是常见的NC代码，还是套料软件内部的数据结构，还是在gen文件中的，基础都是在一段一段的线段元素上进行的，所以最小单元应当是控件中的一段线段，对于坡口线段我们应该带上倾斜角，由于机代码里一般是给AB角（根据机床构型也有AC角），我们直接把这个内容换算成相对于Z轴的倾斜角是不太行得通的，因为绕Z轴的倾角是个锥面，所以应该去获取此时AB倾角对应的切割头的姿态，生成一个向量，这个向量就可以用来求取与面的交点。
 所以抽象数据为线段，属性：起点、终点、对应姿态向量（平行z轴为0，0，0）、从属的元素集合、生成的对应3D实体对象。
 再抽象一个轮廓数据，保存上一步的集合，例如一个圆形轮廓包含将一个圆离散后形成的线段集合，这个类也应当提供从圆心、半径、扫过角生成的线段集合，各种形状都应该以此类推，在生成以轮廓划分的3D图形时能提供方便。
+## 2.3Gen文件处理
+gen文件写的很规则，每一段都有XX-EndofXX，所以把这一块按块拆出来，再分析生成所需的内容，转换成我们的数据结构。
+
+
 [参考1]（https://cloud.tencent.com/developer/article/1760865）
